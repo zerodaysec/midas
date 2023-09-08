@@ -1,0 +1,2 @@
+# midas
+Stock Analysis App

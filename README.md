@@ -1,6 +1,6 @@
 # midas
-Stock Analysis App
 
+Stock Analysis App
 
 ### Leading Indicators
 1. **Moving Averages**: Short-term moving averages can predict future price movement.
@@ -20,9 +20,6 @@ Stock Analysis App
 5. **Dividend Yields**: Higher yields may signify a mature, established company.
 6. **Balance Sheet Metrics**: Debt-to-equity ratio, working capital, etc.
 7. **Market Capitalization**: Can indicate stability but lags real-time events.
-
-
-
 
 Prioritizing additional data sources would depend on the level of granularity you aim for in your analytics. Here are some options, organized by category:
 

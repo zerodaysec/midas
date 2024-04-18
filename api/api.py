@@ -3,6 +3,7 @@ import streamlit as st
 import requests
 # from lxml import etree
 import pandas as pd
+# FIXME: Need to move this to FastAPI
 
 
 def fetch_thirteen_f(url):
@@ -161,11 +162,3 @@ def main():
             "Unemployment": unemployment_analysis,
         }
     )
-
-
-if __name__ == "__main__":
-    main()
-
-
-if __name__ == "__main__":
-    main()

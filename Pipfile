@@ -8,6 +8,7 @@ streamlit = "*"
 pandas = "*"
 requests = "*"
 lxml = "*"
+yfinance = {extras = ["nospam", "repair"], version = "*"}
 
 [dev-packages]
 

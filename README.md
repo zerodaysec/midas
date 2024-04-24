@@ -1,28 +1,30 @@
 # midas
+
 Stock Analysis App
 
 
+
+## Goals
+
 ### Leading Indicators
-1. **Moving Averages**: Short-term moving averages can predict future price movement.
-2. **RSI (Relative Strength Index)**: Helps identify overbought or oversold conditions.
-3. **MACD (Moving Average Convergence Divergence)**: Highlights changes in the strength, direction, momentum, and duration of a trend.
-4. **Stochastic Oscillator**: Compares a stock's current price to its price range over a period of time.
-5. **Fibonacci Retracement**: Uses horizontal lines to indicate where support and resistance levels should be.
-6. **Bollinger Bands**: A volatility indicator that defines a range of price levels.
-7. **Economic Indicators**: Like employment rates, GDP, etc., which could affect a sector or the entire market.
-8. **Sentiment Analysis**: Gauging market sentiment from news or social media.
+1. [ ] **Moving Averages**: Short-term moving averages can predict future price movement.
+2. [ ] **RSI (Relative Strength Index)**: Helps identify overbought or oversold conditions.
+3. [ ] **MACD (Moving Average Convergence Divergence)**: Highlights changes in the strength, direction, momentum, and duration of a trend.
+4. [ ] **Stochastic Oscillator**: Compares a stock's current price to its price range over a period of time.
+5. [ ] **Fibonacci Retracement**: Uses horizontal lines to indicate where support and resistance levels should be.
+6. [ ] **Bollinger Bands**: A volatility indicator that defines a range of price levels.
+7. [ ] **Economic Indicators**: Like employment rates, GDP, etc., which could affect a sector or the entire market.
+8. [ ] **Sentiment Analysis**: Gauging market sentiment from news or social media.
 
 ### Lagging Indicators
-1. **Moving Averages**: Longer-term moving averages to confirm a market trend.
-2. **Volume**: Trading volume following a price move.
-3. **EPS (Earnings Per Share)**: Historical earnings growth can be indicative of future performance but is a lagging indicator.
+1. [ ] **Moving Averages**: Longer-term moving averages to confirm a market trend.
+2. [ ] **Volume**: Trading volume following a price move.
+3. [ ] **EPS (Earnings Per Share)**: Historical earnings growth can be indicative of future performance but is a lagging indicator.
+
 4. **P/E Ratio**: Indicates how much investors are willing to pay for a company’s earnings.
 5. **Dividend Yields**: Higher yields may signify a mature, established company.
 6. **Balance Sheet Metrics**: Debt-to-equity ratio, working capital, etc.
 7. **Market Capitalization**: Can indicate stability but lags real-time events.
-
-
-
 
 Prioritizing additional data sources would depend on the level of granularity you aim for in your analytics. Here are some options, organized by category:
 
@@ -90,29 +92,30 @@ Understanding the layers of bonds or funds requires digging into their structure
 1. **Fund Prospectus**: The most accurate and comprehensive source. Funds are legally obligated to disclose their holdings in the prospectus, which is usually updated annually or semi-annually.
 2. **Quarterly and Annual Reports**: These SEC filings (like the 13F for U.S.-based funds) provide up-to-date information on fund holdings. They are usually available on the SEC’s EDGAR database or the fund’s website.
 3. **Financial Websites**: Websites like Morningstar, Yahoo Finance, and Bloomberg often provide a snapshot of the top holdings of a fund, usually sourced from the latest available filings.
-4. **Fund's Official Website**: Many funds list their top holdings on their websites, often in the investor relations or 'portfolio' section.
-5. **Brokerage Platforms**: If you have access to a trading platform through a brokerage account, these often have tools that allow you to examine the composition of a fund.
-6. **Industry Reports**: Some specialized financial news services provide deep dives into fund holdings but may require a subscription.
-7. **Media Reports**: Financial news outlets occasionally publish articles that detail the largest holdings of high-profile funds.
+4. [ ] **Fund's Official Website**: Many funds list their top holdings on their websites, often in the investor relations or 'portfolio' section.
+5. [ ] **Brokerage Platforms**: If you have access to a trading platform through a brokerage account, these often have tools that allow you to examine the composition of a fund.
+6. [ ] **Industry Reports**: Some specialized financial news services provide deep dives into fund holdings but may require a subscription.
+7. [ ] **Media Reports**: Financial news outlets occasionally publish articles that detail the largest holdings of high-profile funds.
 
 ### Best Practices:
 
-1. **Multiple Sources**: Verify from multiple sources to ensure the data is current and accurate.
-2. **Latest Data**: Make sure you are looking at the most recently available data, as funds can change their holdings frequently.
-3. **Cross-Reference**: It can be beneficial to cross-reference the information you find with the fund's stated investment objectives and strategies to get a full picture.
-4. **Peer Comparison**: To get a sense of how a fund's largest position compares with its peers, you can look up similar funds and their holdings.
+1. [ ] **Multiple Sources**: Verify from multiple sources to ensure the data is current and accurate.
+2. [ ] **Latest Data**: Make sure you are looking at the most recently available data, as funds can change their holdings frequently.
+3. [ ] **Cross-Reference**: It can be beneficial to cross-reference the information you find with the fund's stated investment objectives and strategies to get a full picture.
+4. [ ] **Peer Comparison**: To get a sense of how a fund's largest position compares with its peers, you can look up similar funds and their holdings.
 
 
 
 
 ## API Goals
 
-1. **Morningstar API**: Provides extensive fund data, including portfolio holdings, although it generally requires a subscription.
-2. **Alpha Vantage**: Offers information on mutual funds and ETFs, including sector weighting and top constituents. They offer both free and premium plans.
-3. **E*TRADE API**: If you have an E*TRADE account, their API provides access to a wealth of fund data, including holdings.
-4. **Yahoo Finance**: While not officially an API, it's possible to scrape fund data from Yahoo Finance, which usually includes top holdings.
-5. **IEX Cloud**: Provides various types of financial data, including mutual fund holdings, through its API. It offers both free and premium plans.
-6. **Quandl**: Offers a wide variety of financial and economic data, including fund holdings, but usually requires a subscription for the most valuable datasets.
-7. **Intrinio**: Provides various types of financial market data, including information on ETFs and mutual funds, through their API.
-8. **Zacks Investment Research**: Their API provides detailed mutual fund data including holdings, but typically requires a subscription.
-9. **Interactive Brokers API**: Known for its powerful trading API, it also allows you to fetch quite a bit of fund data if you have an account with them.
+1. [ ] **Yahoo Finance**: While not officially an API, it's possible to scrape fund data from Yahoo Finance, which usually includes top holdings.
+2. [ ] **Morningstar API**: Provides extensive fund data, including portfolio holdings, although it generally requires a subscription.
+3. [ ] **Alpha Vantage**: Offers information on mutual funds and ETFs, including sector weighting and top constituents. They offer both free and premium plans.
+4. [ ] **E*TRADE API**: If you have an E*TRADE account, their API provides access to a wealth of fund data, including holdings.
+5. [ ] **IEX Cloud**: Provides various types of financial data, including mutual fund holdings, through its API. It offers both free and premium plans.
+6. [ ] **Quandl**: Offers a wide variety of financial and economic data, including fund holdings, but usually requires a subscription for the most valuable datasets.
+7. [ ] **Intrinio**: Provides various types of financial market data, including information on ETFs and mutual funds, through their API.
+8. [ ] **Zacks Investment Research**: Their API provides detailed mutual fund data including holdings, but typically requires a subscription.
+9. [ ] **Interactive Brokers API**: Known for its powerful trading API, it also allows you to fetch quite a bit of fund data if you have an account with them.
+

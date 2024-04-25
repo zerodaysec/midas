@@ -132,10 +132,9 @@ def get_stock_data(symbol):
 
 # csv_data = pd.read_csv('https://gist.githubusercontent.com/yongghongg/4fa63c26369f844f22fed6121a24e04f/raw/8bda30f0b3ffbc82e563821ec131ebd62126c20d/SAP500_symbol_list.csv', index_col='Symbol')
 
-csv_data = pd.read_csv('500.csv', index_col='Symbol')
+csv_data = pd.read_csv('sp500_list.csv', index_col='Symbol')
 
 for symbol in csv_data.iterrows():
-    # print(symbol[0])
     get_stock_data(symbol[0])
     time.sleep(5)
 

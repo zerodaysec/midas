@@ -3,6 +3,7 @@
 Stock Analysis App
 
 
+
 ## Goals
 
 ### Leading Indicators
@@ -19,6 +20,7 @@ Stock Analysis App
 1. [ ] **Moving Averages**: Longer-term moving averages to confirm a market trend.
 2. [ ] **Volume**: Trading volume following a price move.
 3. [ ] **EPS (Earnings Per Share)**: Historical earnings growth can be indicative of future performance but is a lagging indicator.
+
 4. **P/E Ratio**: Indicates how much investors are willing to pay for a company’s earnings.
 5. **Dividend Yields**: Higher yields may signify a mature, established company.
 6. **Balance Sheet Metrics**: Debt-to-equity ratio, working capital, etc.
@@ -116,3 +118,4 @@ Understanding the layers of bonds or funds requires digging into their structure
 7. [ ] **Intrinio**: Provides various types of financial market data, including information on ETFs and mutual funds, through their API.
 8. [ ] **Zacks Investment Research**: Their API provides detailed mutual fund data including holdings, but typically requires a subscription.
 9. [ ] **Interactive Brokers API**: Known for its powerful trading API, it also allows you to fetch quite a bit of fund data if you have an account with them.
+

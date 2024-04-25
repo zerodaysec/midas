@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 
 TODAY = datetime.now().strftime("%Y-%m-%d")
 SLEEP_TIME = 0.25
-SP_500_LIST = pd.read_csv("sp500_list.csv")
+SP_500_LIST = pd.read_csv("500.csv")
 MORE_STOCK_LIST = pd.read_csv("more_stocks.csv")
 BASE_DIR = '/Users/jon/data'
 

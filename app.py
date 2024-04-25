@@ -32,7 +32,7 @@ def refresh_sp500():
     sp500_table = tables[0]
 
     # Save the table to a CSV file
-    sp500_table.to_csv('sp500_list.csv', index=False)
+    sp500_table.to_csv('500.csv', index=False)
 
 
 @st.cache_data

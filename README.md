@@ -109,6 +109,7 @@ Understanding the layers of bonds or funds requires digging into their structure
 
 ## API Goals
 
+<<<<<<< Updated upstream
 1. [ ] **Yahoo Finance**: While not officially an API, it's possible to scrape fund data from Yahoo Finance, which usually includes top holdings.
 2. [ ] **Morningstar API**: Provides extensive fund data, including portfolio holdings, although it generally requires a subscription.
 3. [ ] **Alpha Vantage**: Offers information on mutual funds and ETFs, including sector weighting and top constituents. They offer both free and premium plans.
@@ -119,3 +120,20 @@ Understanding the layers of bonds or funds requires digging into their structure
 8. [ ] **Zacks Investment Research**: Their API provides detailed mutual fund data including holdings, but typically requires a subscription.
 9. [ ] **Interactive Brokers API**: Known for its powerful trading API, it also allows you to fetch quite a bit of fund data if you have an account with them.
 
+=======
+1. **Morningstar API**: Provides extensive fund data, including portfolio holdings, although it generally requires a subscription.
+2. **Alpha Vantage**: Offers information on mutual funds and ETFs, including sector weighting and top constituents. They offer both free and premium plans.
+3. **E*TRADE API**: If you have an E*TRADE account, their API provides access to a wealth of fund data, including holdings.
+4. **Yahoo Finance**: While not officially an API, it's possible to scrape fund data from Yahoo Finance, which usually includes top holdings.
+5. **IEX Cloud**: Provides various types of financial data, including mutual fund holdings, through its API. It offers both free and premium plans.
+6. **Quandl**: Offers a wide variety of financial and economic data, including fund holdings, but usually requires a subscription for the most valuable datasets.
+7. **Intrinio**: Provides various types of financial market data, including information on ETFs and mutual funds, through their API.
+8. **Zacks Investment Research**: Their API provides detailed mutual fund data including holdings, but typically requires a subscription.
+9. **Interactive Brokers API**: Known for its powerful trading API, it also allows you to fetch quite a bit of fund data if you have an account with them.
+
+
+
+## SEC Edgar
+
+`pipenv install git+https://github.com/sec-edgar/sec-edgar.git#egg=secedgar`
+>>>>>>> Stashed changes

@@ -9,6 +9,8 @@ pandas = "*"
 requests = "*"
 lxml = "*"
 yfinance = {extras = ["nospam", "repair"], version = "*"}
+secedgar = {git = "https://github.com/sec-edgar/sec-edgar.git"}
+pandas-datareader = "*"
 
 [dev-packages]
 

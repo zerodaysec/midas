@@ -1,57 +1,66 @@
+"""get alpha.py"""
 import os
 import json
-import requests
-from datetime import datetime
 import time
+import sys
+from datetime import datetime
+import requests
+
 
 RATE_LIMIT_SLEEP = 15
 
-def fetch_alpha_vantage_data(api_key, params, ticker, function):
+
+def fetch_alpha_vantage_data(reqparams, apicall):
     """
-    Fetches financial data for a given stock ticker from the Alpha Vantage API based on the chosen function.
-    
+    Fetches financial data for a given stock ticker from the Alpha Vantage API
+    based on the chosen function.
+
     Parameters:
         api_key (str): The API key for the Alpha Vantage API.
         ticker (str): The stock ticker to query.
-        function (str): The API function to use for data retrieval.
+        apicall (str): The API function to use for data retrieval.
 
     Returns:
         dict: The JSON response from the API as a Python dictionary.
     """
     base_url = "https://www.alphavantage.co/query"
 
-
-    if function == "TIME_SERIES_INTRADAY":
+    if apicall == "TIME_SERIES_INTRADAY":
         params["interval"] = "5min"
 
-    response = requests.get(base_url, params=params, timeout=30)
+    response = requests.get(base_url, params=reqparams, timeout=30)
     response.raise_for_status()
 
     return response.json()
 
-def save_to_json(data, ticker, function):
+
+def save_to_json(jsondata, ticker, apicall):
     """
     Saves the API data to a JSON file.
-    
+
     Parameters:
         data (dict): The API data to save.
         ticker (str): The stock ticker to be used in the filename.
-        function (str): The API function name to be used in the filename.
+        apicall (str): The API function name to be used in the filename.
     """
     date_str = datetime.now().strftime("%Y-%m-%d")
-    filename = f"../data/{date_str}-{ticker}-{function}.json"
-    
-    with open(filename, 'w') as f:
-        json.dump(data, f, indent=4)
-    
+    filename = f"../data/{date_str}-{ticker}-{apicall}.json"
+
+    with open(filename, "w", encoding='utf-8') as f:
+        json.dump(jsondata, f, indent=4)
+
     print(f"Data saved to {filename}")
+
 
 if __name__ == "__main__":
     # Fetch the API key from environment variables
     api_key = os.getenv("ALPHA_VANTAGE_API_KEY")
     if api_key is None:
-        print("Please set your Alpha Vantage API key in the ALPHA_VANTAGE_API_KEY environment variable.")
-        exit(1)
+        print(
+            "Please set your Alpha Vantage API key in the ALPHA_VANTAGE_API_KEY"
+             " environment variable."
+        )
+        sys.exit(1)
 
     # Define available endpoints
     available_functions = [
@@ -64,7 +73,7 @@ if __name__ == "__main__":
         "BALANCE_SHEET",
         "CASH_FLOW",
         "EARNINGS",
-        "CASH_FLOW"
+        "CASH_FLOW",
     ]
 
     available_global = [
@@ -72,7 +81,7 @@ if __name__ == "__main__":
         "EARNINGS_CALENDAR",
         "IPO_CALENDAR",
         "CURRENCY_EXCHANGE_RATE",
-        "CURRENCY_EXCHANGE_RATE"
+        "CURRENCY_EXCHANGE_RATE",
     ]
     commodities = [
         "WTI",
@@ -85,7 +94,7 @@ if __name__ == "__main__":
         "COTTON",
         "SUGAR",
         "COFFEE",
-        "ALL_COMMODITIES"
+        "ALL_COMMODITIES",
     ]
     economic_indicators = [
         "REAL_GDP",
@@ -97,7 +106,7 @@ if __name__ == "__main__":
         "RETAIL_SALES",
         "DURABLES",
         "UNEMPLOYMENT",
-        "NONFARM_PAYROLL"
+        "NONFARM_PAYROLL",
     ]
     tech_indicators = [
         "SMA",
@@ -116,53 +125,68 @@ if __name__ == "__main__":
         "STOCHRSI",
         "WILLR",
         "ADX",
-        "AROON"
+        "AROON",
     ]
     # Get the ticker symbol from the user
-    # ticker = input("Enter the stock ticker: ").strip().upper()
-    TICKER = "RXT"
+    # TICKER = input("Enter the stock ticker: ").strip().upper()
+    TICKER = "AAPL"
 
     # Loop through all available functions to fetch and save data
     for function in available_functions:
         try:
-            params = {
-                "function": function,
-                "symbol": TICKER,
-                "apikey": api_key
-            }
+            params = {"function": function, "symbol": TICKER, "apikey": api_key}
             # Fetch the data from the Alpha Vantage API
-            data = fetch_alpha_vantage_data(api_key, params, TICKER, function)
+            data = fetch_alpha_vantage_data(params, function)
             # Save the data to a JSON file
             save_to_json(data, TICKER, function)
             # To avoid hitting rate limits, wait before the next API call
             time.sleep(RATE_LIMIT_SLEEP)  # Adjust this based on your API rate limits
         except requests.RequestException as e:
-            print(f"An error occurred while fetching data from function {function}: {e}")
+            print(
+                f"An error occurred while fetching data from function {function}: {e}"
+            )
 
     # Loop through all available functions to fetch and save data
     for function in economic_indicators:
         try:
             TICKER = "EconomicIndicator"
-            params = {
-                "function": function,
-                "apikey": api_key
-            }
+            params = {"function": function, "apikey": api_key}
             # Fetch the data from the Alpha Vantage API
-            data = fetch_alpha_vantage_data(api_key, params, TICKER, function)
+            data = fetch_alpha_vantage_data(params, function)
             # Save the data to a JSON file
             save_to_json(data, TICKER, function)
             # To avoid hitting rate limits, wait before the next API call
             time.sleep(RATE_LIMIT_SLEEP)  # Adjust this based on your API rate limits
         except requests.RequestException as e:
-            print(f"An error occurred while fetching data from function {function}: {e}")
+            print(
+                f"An error occurred while fetching data from function {function}: {e}"
+            )
 
     # Loop through all available functions to fetch and save data
     for function in commodities:
         try:
             TICKER = "COMOD"
+            params = {"function": function, "apikey": api_key}
+            # Fetch the data from the Alpha Vantage API
+            data = fetch_alpha_vantage_data(params, function)
+            # Save the data to a JSON file
+            save_to_json(data, TICKER, function)
+            # To avoid hitting rate limits, wait before the next API call
+            time.sleep(RATE_LIMIT_SLEEP)  # Adjust this based on your API rate limits
+        except requests.RequestException as e:
+            print(
+                f"An error occurred while fetching data from function {function}: {e}"
+            )
+
+    # Loop through all available functions to fetch and save data
+    for function in tech_indicators:
+        try:
+            TICKER = "AAPL"
             params = {
                 "function": function,
-                "apikey": api_key
+                "symbol": TICKER,
+                "apikey": api_key,
+                "interval": "daily"
             }
             # Fetch the data from the Alpha Vantage API
             data = fetch_alpha_vantage_data(api_key, params, TICKER, function)
@@ -172,22 +196,3 @@ if __name__ == "__main__":
             time.sleep(RATE_LIMIT_SLEEP)  # Adjust this based on your API rate limits
         except requests.RequestException as e:
             print(f"An error occurred while fetching data from function {function}: {e}")
-
-    # # Loop through all available functions to fetch and save data
-    # for function in tech_indicators:
-    #     try:
-    #         TICKER = "RXT"
-    #         params = {
-    #             "function": function,
-    #             "symbol": TICKER,
-    #             "apikey": api_key,
-    #             "interval": "daily"
-    #         }
-    #         # Fetch the data from the Alpha Vantage API
-    #         data = fetch_alpha_vantage_data(api_key, params, TICKER, function)
-    #         # Save the data to a JSON file
-    #         save_to_json(data, TICKER, function)
-    #         # To avoid hitting rate limits, wait before the next API call
-    #         time.sleep(RATE_LIMIT_SLEEP)  # Adjust this based on your API rate limits
-    #     except requests.RequestException as e:
-    #         print(f"An error occurred while fetching data from function {function}: {e}")

@@ -1,8 +1,11 @@
+#VERSION=0.1
+name: CI
+
 on: push
-name: on push
+
 jobs:
-  gitHubActionForPylint:
-    name: GitHub Action for pylint
+  pylint:
+    name: Pylint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
@@ -26,3 +29,11 @@ jobs:
 
       - run: pipenv run pylint **/*.py
 
+  # shellcheck:
+  #   name: ShellCheck
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@master
+
+  #     - name: Run ShellCheck
+  #       uses: ludeeus/action-shellcheck@master

@@ -14,6 +14,7 @@ pandas-datareader = "*"
 fastapi = "*"
 uvicorn = {extras = ["standard"], version = "*"}
 matplotlib = "*"
+pylint = "*"
 
 [dev-packages]
 

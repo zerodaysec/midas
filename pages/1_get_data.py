@@ -1,6 +1,5 @@
 """midas.py"""
 
-# import datetime
 import json
 import logging
 import os
@@ -8,77 +7,119 @@ import sys
 import time
 from datetime import datetime
 import pandas as pd
-import pandas_datareader as pdr
 import requests
 import streamlit as st
 import yfinance as yf
-from secedgar import FilingType, filings
-
-# from yfinance import shared
+from sec_edgar_downloader import Downloader
 
 logger = logging.getLogger(__name__)
-logging.basicConfig(filename="app.log", encoding="utf-8", level=logging.DEBUG)
+logging.basicConfig(encoding="utf-8", level=logging.INFO)
 
-OTHER_STOCKS = ['FXAIX','VGT','VIG','VOO','VTI','VFAIX','VEA','GLD','VNQ','MUB','ADT']
+# Static variables
+HTTP_HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) "
+    "Chrome/91.0.4472.101 Safari/537.3"
+}
+DATA_DIR = os.getenv("DATA_DIR")
+# Check if the DATA_DIR is set and exists
+if DATA_DIR is None:
+    logger.error("DATA_DIR not set, exiting")
+    sys.exit(1)
+
+MIDAS_DATA_DIR = f"{DATA_DIR}/midas"
+SEC_DATA_DIR = f"{DATA_DIR}/SEC"
+OTHER_STOCKS = [
+    "RXT",
+    "FXAIX",
+    "VGT",
+    "VIG",
+    "VOO",
+    "VTI",
+    "VFAIX",
+    "VEA",
+    "GLD",
+    "VNQ",
+    "MUB",
+    "ADT",
+]
+RATE_LIMIT_ALPHA_SLEEP = 15
+TODAY = datetime.now().strftime("%Y-%m-%d")
+
+SEC_DL = Downloader("Personal", "fixme@example.com", SEC_DATA_DIR)
+
+ALPHA_VANTAGE_API_KEY = os.getenv("ALPHA_VANTAGE_API_KEY")
+if ALPHA_VANTAGE_API_KEY is None:
+    logger.error(
+        "Please set your Alpha Vantage API key in the ALPHA_VANTAGE_API_KEY"
+        " environment variable."
+    )
+    sys.exit(1)
 
 
-CSV_DATA = pd.read_csv('500.csv', index_col='Symbol')
-SP500_LIST = []
-
-for symbol in CSV_DATA.iterrows():
-    SP500_LIST.append(symbol[0])
-
+@st.cache_data()
 def refresh_sp500():
+    """Refresh the sp500 from Wikipedia"""
     url = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
-
-    # Set a User-Agent to mimic a web browser
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) "
-        "Chrome/91.0.4472.101 Safari/537.3"
-    }
-
-    # Fetch the page content
-    response = requests.get(url, headers=headers, timeout=30)
-
-    # Use pandas to read the HTML tables
+    response = requests.get(url, headers=HTTP_HEADERS, timeout=30)
     tables = pd.read_html(response.text)
-    sp500_table = tables[0]
+    tables[0].to_csv(f"{MIDAS_DATA_DIR}/500.csv", index=False)
 
-    # Save the table to a CSV file
-    sp500_table.to_csv("500.csv", index=False)
+refresh_sp500()
+
+CSV_DATA = pd.read_csv(f"{MIDAS_DATA_DIR}/500.csv", index_col="Symbol")
+SP500_LIST = [symbol[0] for symbol in CSV_DATA.iterrows()]
+SP500_LIST.sort()
+
+
+
+
+@st.cache_data()
+def refresh_ndxt():
+    """Refresh the ndxt from Wikipedia"""
+    url = "https://en.wikipedia.org/wiki/Nasdaq-100"
+    response = requests.get(url, headers=HTTP_HEADERS, timeout=30)
+    tables = pd.read_html(response.text)
+    tables[4].to_csv(f"{MIDAS_DATA_DIR}/ndxt.csv", index=False)
+
+
+@st.cache_data()
+def refresh_world_market_cap():
+    """Refresh the ndxt from Wikipedia"""
+    url = (
+        "https://en.wikipedia.org/wiki/List_of_countries_by_stock_market_capitalization"
+    )
+    response = requests.get(url, headers=HTTP_HEADERS, timeout=30)
+    tables = pd.read_html(response.text)
+    tables[0].to_csv(f"{MIDAS_DATA_DIR}/world-market-cap-ranking.csv", index=False)
+    tables[1].to_csv(f"{MIDAS_DATA_DIR}/world-market-cap.csv", index=False)
 
 
 @st.cache_data
 def fetch_thirteen_f(ticker):
     """doc str."""
-    # FIXME: This is not working
-    # response = requests.get(url, timeout=30)
-    # if response.status_code == 200:
-    # return response.content
-
-    return None
+    data = SEC_DL.get("13F-HR", ticker, download_details=True, include_amends=True)
+    print(data)
+    return data
 
 
-def parse_thirteen_f(ticker):
-    """doc str."""
-    # FIXME: This is not working
-    my_filings = filings(
-        cik_lookup=ticker,
-        filing_type=FilingType.FILING_10Q,
-        user_agent="Jon P (your email)",
-    )
-
-    # TODO: secedgar library fails with JSON errors all the time...
-    # my_filings.save(f'data/')
-    return {}
-
-
-# ------ Data Fetching Functions ------
 @st.cache_data
-def fetch_stock_data(ticker):
+def fetch_stock_data(ticker, force=False):
     """doc str."""
-    print(f"Getting stock data for {ticker}")
+    try:
+        with open(
+            f"{MIDAS_DATA_DIR}/{TODAY}-{ticker}.json", "r", encoding="utf-8"
+        ) as src_file:
+            data = json.load(src_file)
+            logger.info("Found data for ticker... %s", ticker)
+            if force:
+                pass
+
+            return data
+    except FileNotFoundError as err:
+        print(err)
+
+    print(f"Getting updated stock data for {ticker}")
     data = {}
     try:
         stock_ticker = yf.Ticker(ticker)
@@ -91,21 +132,21 @@ def fetch_stock_data(ticker):
     except Exception as err:
         print("Error: %s", err)
 
+    # get historical market data
     try:
-        # get historical market data
         mo1 = stock_ticker.history(period="1mo")
         data["1mo_hist"] = pd.DataFrame(mo1).to_json()
     except Exception as err:
         print("Error: %s", err)
 
+    # show meta information about the history (requires history() to be called first)
     try:
-        # show meta information about the history (requires history() to be called first)
         data["history_metadata"] = stock_ticker.history_metadata
     except Exception as err:
         print("Error: %s", err)
 
+    # show actions (dividends, splits, capital gains)
     try:
-        # show actions (dividends, splits, capital gains)
         data["actions"] = pd.DataFrame(stock_ticker.actions).to_json()
         data["dividends"] = pd.DataFrame(stock_ticker.dividends).to_json()
         data["splits"] = pd.DataFrame(stock_ticker.splits).to_json()
@@ -118,17 +159,14 @@ def fetch_stock_data(ticker):
     except Exception as err:
         print("Error: %s", err)
 
+    # show share count
     try:
-        # show share count
         get_shares_full = stock_ticker.get_shares_full(start="2022-01-01", end=None)
         df = pd.DataFrame(get_shares_full)
         df.reset_index(inplace=True)
         data["get_shares_full"] = pd.DataFrame(df).to_json()
     except Exception as err:
         print("Error: %s", err)
-
-    # show financials:
-    # - income statement
 
     try:
         income_stmt = stock_ticker.income_stmt
@@ -151,8 +189,8 @@ def fetch_stock_data(ticker):
     except Exception as err:
         print("Error: %s", err)
 
+    # show holders
     try:
-        # show holders
         data["major_holders"] = pd.DataFrame(stock_ticker.major_holders).to_json()
         data["institutional_holders"] = pd.DataFrame(
             stock_ticker.institutional_holders
@@ -172,8 +210,8 @@ def fetch_stock_data(ticker):
     except Exception as err:
         print("Error: %s", err)
 
+    # show recommendations
     try:
-        # show recommendations
         data["recommendations"] = pd.DataFrame(stock_ticker.recommendations).to_json()
         data["recommendations_summary"] = pd.DataFrame(
             stock_ticker.recommendations_summary
@@ -195,8 +233,8 @@ def fetch_stock_data(ticker):
     except Exception as err:
         print("Error: %s", err)
 
+    # show options expirations
     try:
-        # show options expirations
         data["options"] = stock_ticker.options
 
         # FIXME: Get the options data into the json dict so we can publish to mongo
@@ -210,26 +248,20 @@ def fetch_stock_data(ticker):
     except Exception as err:
         print("Error: %s", err)
 
+    # show news
     try:
-        # show news
         data["news"] = stock_ticker.news
     except Exception as err:
         print("Error: %s", err)
 
     # TODO: This is only used when debuggins Json not Serializable errors
-    # with open(f'data/{symbol}.txt', 'w') as f:
+    # with open(f'{MIDAS_DATA_DIR}/{symbol}.txt', 'w') as f:
     #     print(data, file=f)
 
-    with open(f"data/{ticker}.json", "w") as file:
+    with open(f"{MIDAS_DATA_DIR}/{TODAY}-{ticker}.json", "w", encoding="utf-8") as file:
         file.write(json.dumps(data))
 
     return data
-
-    print(ticker)
-    return {}  # Logic to fetch stock data
-
-
-RATE_LIMIT_SLEEP = 15
 
 
 def fetch_alpha_vantage_data(reqparams, apicall):
@@ -256,7 +288,7 @@ def fetch_alpha_vantage_data(reqparams, apicall):
     return response.json()
 
 
-def save_to_json(jsondata, ticker, apicall):
+def alpha_save_to_json(jsondata, ticker, apicall):
     """
     Saves the API data to a JSON file.
 
@@ -265,8 +297,7 @@ def save_to_json(jsondata, ticker, apicall):
         ticker (str): The stock ticker to be used in the filename.
         apicall (str): The API function name to be used in the filename.
     """
-    date_str = datetime.now().strftime("%Y-%m-%d")
-    filename = f"data/{date_str}-{ticker}-{apicall}.json"
+    filename = f"{MIDAS_DATA_DIR}/alphavantage/{TODAY}-{ticker}-{apicall}.json"
 
     with open(filename, "w", encoding="utf-8") as f:
         json.dump(jsondata, f, indent=4)
@@ -342,76 +373,69 @@ ALPHA_OPTS = {
 
 
 def get_alpha_vantage_data():
-    api_key = os.getenv("ALPHA_VANTAGE_API_KEY")
-    if api_key is None:
-        print(
-            "Please set your Alpha Vantage API key in the ALPHA_VANTAGE_API_KEY"
-            " environment variable."
-        )
-        sys.exit(1)
     data = {}
     # Loop through all available functions to fetch and save data
     for function in ALPHA_OPTS["economic_indicators"]:
         try:
             ticker = "EconomicIndicator"
-            params = {"function": function, "apikey": api_key}
-            # Fetch the data from the Alpha Vantage API
+            params = {"function": function, "apikey": ALPHA_VANTAGE_API_KEY}
             data = fetch_alpha_vantage_data(params, function)
-            # Save the data to a JSON file
-            save_to_json(data, ticker, function)
-            # To avoid hitting rate limits, wait before the next API call
-            time.sleep(RATE_LIMIT_SLEEP)  # Adjust this based on your API rate limits
+            alpha_save_to_json(data, ticker, function)
+            time.sleep(
+                RATE_LIMIT_ALPHA_SLEEP
+            )
             data[function] = data
         except requests.RequestException as e:
-            print(
-                f"An error occurred while fetching data from function {function}: {e}"
+            logger.error(
+                "An error occurred while fetching data from function %s: %s", function, e
             )
 
     # Loop through all available functions to fetch and save data
     for function in ALPHA_OPTS["commodities"]:
         try:
             ticker = "COMOD"
-            params = {"function": function, "apikey": api_key}
+            params = {"function": function, "apikey": ALPHA_VANTAGE_API_KEY}
             # Fetch the data from the Alpha Vantage API
             data = fetch_alpha_vantage_data(params, function)
             # Save the data to a JSON file
-            save_to_json(data, ticker, function)
+            alpha_save_to_json(data, ticker, function)
             # To avoid hitting rate limits, wait before the next API call
-            time.sleep(RATE_LIMIT_SLEEP)  # Adjust this based on your API rate limits
+            time.sleep(
+                RATE_LIMIT_ALPHA_SLEEP
+            )  # Adjust this based on your API rate limits
             data[function] = data
         except requests.RequestException as e:
-            print(
-                f"An error occurred while fetching data from function {function}: {e}"
+            logger.error(
+                "An error occurred while fetching data from function %s: %s", function, e
             )
 
     return data
 
 
 def get_alpha_vantage_ticker_data(ticker):
-    api_key = os.getenv("ALPHA_VANTAGE_API_KEY")
-    if api_key is None:
-        print(
-            "Please set your Alpha Vantage API key in the ALPHA_VANTAGE_API_KEY"
-            " environment variable."
-        )
-        sys.exit(1)
 
     data = {}
 
     # Loop through all available functions to fetch and save data
     for function in ALPHA_OPTS["available_functions"]:
         try:
-            params = {"function": function, "symbol": ticker, "apikey": api_key}
+            params = {
+                "function": function,
+                "symbol": ticker,
+                "apikey": ALPHA_VANTAGE_API_KEY,
+            }
             # Fetch the data from the Alpha Vantage API
             data = fetch_alpha_vantage_data(params, function)
             # Save the data to a JSON file
-            save_to_json(data, ticker, function)
+            alpha_save_to_json(data, ticker, function)
             # To avoid hitting rate limits, wait before the next API call
-            time.sleep(RATE_LIMIT_SLEEP)  # Adjust this based on your API rate limits
+            time.sleep(
+                RATE_LIMIT_ALPHA_SLEEP
+            )  # Adjust this based on your API rate limits
             data[function] = data
         except requests.RequestException as e:
-            print(
-                f"An error occurred while fetching data from function {function}: {e}"
+            logger.error(
+                "An error occurred while fetching data from function %s: %s", function, e
             )
 
     # Loop through all available functions to fetch and save data
@@ -420,229 +444,61 @@ def get_alpha_vantage_ticker_data(ticker):
             params = {
                 "function": function,
                 "symbol": ticker,
-                "apikey": api_key,
+                "apikey": ALPHA_VANTAGE_API_KEY,
                 "interval": "daily",
             }
             # Fetch the data from the Alpha Vantage API
             data = fetch_alpha_vantage_data(params, function)
             # Save the data to a JSON file
-            save_to_json(data, ticker, function)
+            alpha_save_to_json(data, ticker, function)
             # To avoid hitting rate limits, wait before the next API call
-            time.sleep(RATE_LIMIT_SLEEP)  # Adjust this based on your API rate limits
+            time.sleep(
+                RATE_LIMIT_ALPHA_SLEEP
+            )  # Adjust this based on your API rate limits
             data[function] = data
         except requests.RequestException as e:
-            print(
-                f"An error occurred while fetching data from function {function}: {e}"
+            logger.error(
+                "An error occurred while fetching data from function %s: %s",
+                function,
+                e,
             )
 
     return data
 
 
-@st.cache_data
-def fetch_economic_data():
-    """doc str."""
-    # FIXME: This is not working
-    start = datetime(1960, 1, 1)
-    end = datetime(2023, 6, 9)
-
-    # Retrieve the data for each feature
-    data_gdp = pdr.DataReader("GDP", "fred", start, end)["GDP"]
-    data_gdp.index = pd.to_datetime(data_gdp.index)
-
-    data_cpi = pdr.DataReader("CPIAUCSL", "fred", start, end)["CPIAUCSL"]
-    data_cpi.index = pd.to_datetime(data_cpi.index)
-
-    data_stock = pdr.DataReader("SPASTT01USM661N", "fred", start, end)[
-        "SPASTT01USM661N"
-    ]
-    data_stock.index = pd.to_datetime(data_stock.index)
-
-    data_pce = pdr.DataReader("PCE", "fred", start, end)["PCE"]
-    data_pce.index = pd.to_datetime(data_pce.index)
-
-    data_govs = pdr.DataReader("FGEXPND", "fred", start, end)["FGEXPND"]
-    data_govs.index = pd.to_datetime(data_govs.index)
-
-    data_binv = pdr.DataReader("W987RC1Q027SBEA", "fred", start, end)["W987RC1Q027SBEA"]
-    data_binv.index = pd.to_datetime(data_binv.index)
-
-    data_em = pdr.DataReader("PAYEMS", "fred", start, end)["PAYEMS"]
-    data_em.index = pd.to_datetime(data_em.index)
-
-    data_unem = pdr.DataReader("ICSA", "fred", start, end)["ICSA"]
-    data_unem.index = pd.to_datetime(data_unem.index)
-
-    # Combine the features into a single DataFrame
-    data = pd.DataFrame(
-        {
-            "data_gdp": data_gdp,
-            "data_cpi": data_cpi,
-            "data_stock": data_stock,
-            "data_pce": data_pce,
-            "data_govs": data_govs,
-            "data_binv": data_binv,
-            "data_em": data_em,
-            "data_unem": data_unem,
-        }
-    )
-
-    # Remove rows with missing values
-    data = data.dropna()
-    # data.head()
-    return data  # Logic to fetch economic data
-
-
-# ------ Analysis Functions ------
-# ---- Leading Indicators ----
-def calculate_moving_average(data):
-    """doc str."""
-    # FIXME: This is not working
-    return {}  # Logic for Moving Average
-
-
-def calculate_macd(data):
-    """doc str."""
-    # FIXME: This is not working
-    return {}  # Logic for MACD
-
-
-def analyze_social_media_sentiment(data):
-    """doc str."""
-    # FIXME: This is not working
-    return {}  # Logic for social media sentiment
-
-
-# ---- Lagging Indicators ----
-def calculate_rsi(data):
-    """doc str."""
-    # FIXME: This is not working
-    return {}  # Logic for Relative Strength Index
-
-
-def calculate_bollinger_bands(data):
-    """doc str."""
-    # FIXME: This is not working
-    return {}  # Logic for Bollinger Bands
-
-
-# ---- Economic Indicators ----
-def analyze_gdp(data):
-    """doc str."""
-    # FIXME: This is not working
-    return data  # Logic for GDP Analysis
-
-
-def analyze_interest_rates(data):
-    """doc str."""
-    # FIXME: This is not working
-    return data  # Logic for Interest Rates Analysis
-
-
-def analyze_unemployment(data):
-    """doc str."""
-    # FIXME: This is not working
-    return data  # Logic for Unemployment Analysis
-
-
-# ------ Display Functions ------
-def display_stock_data(data):
-    """doc str."""
-    # FIXME: This is not working
-    st.subheader("Stock Data")
-
-    for news in data["news"]:
-        st.subheader(news["title"])
-        if "thumbnail" in news:
-            st.image(news["thumbnail"]["resolutions"][0]["url"])
-        st.write(news["link"])
-
-    skip_keys = ["news"]
-    for key in data:
-        if key in skip_keys:
-            continue
-
-        st.header(key)
-
-        with st.expander(f"See more: {key}"):
-            st.json(data[key])
-    return {}  # Logic to display stock data
-
-
-def display_economic_data(data):
-    """doc str."""
-    # FIXME: This is not working
-    # print(data)
-    st.subheader("Econ Data")
-    st.dataframe(data.tail())
-
-
-def display_thirteen_f(data):
-    """doc str."""
-    # FIXME: This is not working
-    st.subheader("13f")
-    print(data)
-
-
-def display_analysis(data):
-    """doc str."""
-    # FIXME: This is not working
-    st.subheader("Stock Analysis")
-
-
 # ------ Main App Function ------
 def main():
     """main."""
-    # FIXME: This is not working
-    st.title("Financial Analytics Dashboard")
+    st.title("Financial Data Downloader Dashboard")
 
-    for stk in OTHER_STOCKS:
-        fetch_stock_data(stk)
+    if st.button("Refresh All Data"):
+        # for stk in OTHER_STOCKS:
+        #     fetch_stock_data(stk)
+
+        # for stk in SP500_LIST:
+        #     fetch_stock_data(stk)
+
+        st.write("Refreshing SP500.csv")
+        refresh_sp500()
+        refresh_ndxt()
+        st.write("Refreshing ndxt.csv")
+        # st.write('Refreshing get_alpha_vantage_data()')
+        # get_alpha_vantage_data()
 
     # User Inputs
-    ticker = st.text_input("Enter stock ticker", "AAPL")
-    ticker_picker = st.selectbox('S&P500:', SP500_LIST)
-    indicators = ["GDP", "Interest Rates", "Unemployment"]
-    for ind in indicators:
-        st.subheader(ind)
+    ticker = st.text_input("Enter stock to refresh (ex. AAPL)")
+    ticker_picker = st.selectbox("S&P500:", OTHER_STOCKS + SP500_LIST)
 
-    # Fetch Data
-    stock_data = fetch_stock_data(ticker)
-    _13f = parse_thirteen_f(ticker)
-    economic_data = fetch_economic_data()
-    sec_thirteen_f_data = fetch_thirteen_f(ticker)
-
-    # Analyze Data
-    moving_avg = calculate_moving_average(stock_data)
-    macd = calculate_macd(stock_data)
-    social_media_sentiment = analyze_social_media_sentiment(ticker)
-
-    rsi = calculate_rsi(stock_data)
-    bollinger_bands = calculate_bollinger_bands(stock_data)
-
-    gdp_analysis = analyze_gdp(economic_data)
-    interest_rates_analysis = analyze_interest_rates(economic_data)
-    unemployment_analysis = analyze_unemployment(economic_data)
-
-    # Display Data and Analysis
-    display_stock_data(stock_data)
-    display_economic_data(economic_data)
-    display_thirteen_f(sec_thirteen_f_data)
-    display_analysis(
-        {
-            "Moving Average": moving_avg,
-            "MACD": macd,
-            "Social Media Sentiment": social_media_sentiment,
-            "RSI": rsi,
-            "Bollinger Bands": bollinger_bands,
-            "GDP": gdp_analysis,
-            "Interest Rates": interest_rates_analysis,
-            "Unemployment": unemployment_analysis,
-        }
-    )
+    if ticker != "":
+        ticker = ticker.upper()
+    else:
+        ticker = ticker_picker
 
 
 if __name__ == "__main__":
+    refresh_world_market_cap()
+    refresh_ndxt()
     refresh_sp500()
+    main()
     # alpha_data = get_alpha_vantage_data()
     # logger.debug(alpha_data)
-    main()

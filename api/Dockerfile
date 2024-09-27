@@ -15,7 +15,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends gcc git
 
 # Install python dependencies in /.venv
 COPY Pipfile .
-COPY Pipfile.lock .
+# COPY Pipfile.lock .
 RUN PIPENV_VENV_IN_PROJECT=1 pipenv install --deploy
 
 FROM base AS runtime
@@ -30,7 +30,7 @@ WORKDIR /home/appuser
 USER appuser
 
 # Install application into container
-COPY . .
+COPY . ./api
 
 # Run the application
 # ENTRYPOINT ["python","get_data.py"]

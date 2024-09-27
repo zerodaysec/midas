@@ -1,0 +1,12 @@
+"""view_stock.py"""
+import os
+import sys
+
+SOMETHING = False
+
+if SOMETHING:
+    sys.exit(1)
+
+print(os.getcwd())
+print(os.path.basename(os.getcwd()))
+print(os.path.exists('/Users/jon'))

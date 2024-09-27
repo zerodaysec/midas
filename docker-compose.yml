@@ -1,0 +1,94 @@
+services:
+  worker-stocks:
+    image: midas-worker-stocks
+    container_name: svc-worker-stk.midas.skynet.local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - /Volumes/DATA/data/finance:/data
+    environment:
+      - WORKERS=1
+    entrypoint: ["python", "worker_stocks.py"]
+
+  api:
+    image: midas-api
+    container_name: midas-api.team-skynet.io
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    volumes:
+      - /Volumes/DATA/data/finance:/data
+    entrypoint: [
+        "uvicorn",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "8000",
+        "api.api:app", #{dir}/{file}:app
+        "--reload",
+      ]
+    networks:
+      - backend
+    labels:
+      # - com.centurylinklabs.watchtower.scope=autoupdate
+      # - com.centurylinklabs.watchtower.enable
+      - traefik.enable=true
+      - traefik.http.routers.midas-api.entrypoints=http
+      - traefik.http.routers.midas-api.rule=Host(`midas-api.prod.team-skynet.io`)
+      - "traefik.http.routers.midas-api.middlewares=https-redirectscheme@file"
+      - traefik.http.routers.midas-api-secure.entrypoints=https
+      - traefik.http.routers.midas-api-secure.rule=Host(`midas-api.prod.team-skynet.io`)
+      - traefik.http.routers.midas-api-secure.middlewares=skynet-secured@file
+      - traefik.http.routers.midas-api-secure.tls=true
+      - "traefik.http.routers.midas-api-secure.service=midas-api"
+      - "traefik.docker.network=backend"
+      - "traefik.http.services.midas-api.loadbalancer.server.port=8000"
+
+  worker-sec:
+    image: midas-worker-sec
+    container_name: svc-worker-sec.midas.skynet.local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - /Volumes/DATA/data/finance:/data
+    environment:
+      - WORKERS=10
+    entrypoint: ["python", "worker_sec.py"]
+    command: ["--shuffle"]
+
+  web:
+    image: midas-worker-www
+    container_name: midas.team-skynet.io
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - /Users/jon/Data/FINANCE:/data
+    environment:
+      - WORKERS=2
+    # ports:
+    #   - "8502:8501"
+    entrypoint: ["streamlit", "run", "midas.py"]
+    # command: ["--force-refresh"]
+    networks:
+      - backend
+    labels:
+      # - com.centurylinklabs.watchtower.scope=autoupdate
+      # - com.centurylinklabs.watchtower.enable
+      - traefik.enable=true
+      - traefik.http.routers.midas.entrypoints=http
+      - traefik.http.routers.midas.rule=Host(`midas.prod.team-skynet.io`)
+      - "traefik.http.routers.midas.middlewares=https-redirectscheme@file"
+      - traefik.http.routers.midas-secure.entrypoints=https
+      - traefik.http.routers.midas-secure.rule=Host(`midas.prod.team-skynet.io`)
+      - traefik.http.routers.midas-secure.middlewares=skynet-secured@file
+      - traefik.http.routers.midas-secure.tls=true
+      - "traefik.http.routers.midas-secure.service=midas"
+      - "traefik.docker.network=backend"
+      - "traefik.http.services.midas.loadbalancer.server.port=8501"
+
+networks:
+  backend:
+    external: true

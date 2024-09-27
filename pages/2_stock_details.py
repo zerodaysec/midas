@@ -1,4 +1,5 @@
 """This is my module."""
+
 import csv
 import os
 import time
@@ -12,9 +13,19 @@ import matplotlib.pyplot as plt
 
 TODAY = datetime.now().strftime("%Y-%m-%d")
 SLEEP_TIME = 0.25
-SP_500_LIST = pd.read_csv("500.csv")
-MORE_STOCK_LIST = pd.read_csv("more_stocks.csv")
-BASE_DIR = '/Users/jon/data'
+
+
+BASE_DIR = "/Users/jon/Data/FINANCE"
+STOCKS_DIR = f"{BASE_DIR}/STOCKS"
+MIDAS_DATA_DIR = f"{BASE_DIR}/MIDAS"
+
+try:
+    MORE_STOCK_LIST = pd.read_csv(f"{STOCKS_DIR}/more_stocks.csv")
+except Exception as err:
+    MORE_STOCK_LIST = None
+
+SP_500_LIST = pd.read_csv(f"{MIDAS_DATA_DIR}/500.csv")
+
 
 def init():
     pass
@@ -49,7 +60,7 @@ def save_stock_data_to_csv(stock_data, ticker_symbol):
         data (pd.DataFrame): The stock data.
         ticker (str): The stock ticker symbol.
     """
-    stock_data.to_csv(f"{BASE_DIR}/{ticker_symbol}.csv")
+    stock_data.to_csv(f"{STOCKS_DIR}/{TODAY}-{ticker_symbol}.csv")
     print(f"Saved csv data {ticker_symbol}")
 
 
@@ -88,10 +99,12 @@ def add_additional_stock(ticker_symbol):
     ]
 
     # Check if the file exists to decide whether to write the header
-    file_exists = os.path.isfile("more_stocks.csv")
+    file_exists = os.path.isfile(f"{STOCKS_DIR}/more_stocks.csv")
 
     # Append the information to the CSV file
-    with open("more_stocks.csv", "a", newline="", encoding="utf-8") as file:
+    with open(
+        f"{STOCKS_DIR}/more_stocks.csv", "a", newline="", encoding="utf-8"
+    ) as file:
         writer = csv.DictWriter(file, fieldnames=header)
 
         if not file_exists:
@@ -102,7 +115,7 @@ def add_additional_stock(ticker_symbol):
 
 def save_stock_info_to_json(stock_data, ticker_symbol):
     """Save stock metadata to a JSON file."""
-    filename = f"{BASE_DIR}/{TODAY}-{ticker_symbol}.json"
+    filename = f"{STOCKS_DIR}/{TODAY}-{ticker_symbol}.json"
     with open(filename, "w", encoding="utf-8") as file:
         json.dump(stock_data, file)
     print(f"Saving stock info json for {ticker_symbol}")
@@ -118,7 +131,9 @@ def read_stock_data_from_csv(ticker_symbol):
     Returns:
         pd.DataFrame: A DataFrame containing the stock data.
     """
-    return pd.read_csv(f"{BASE_DIR}/{ticker_symbol}.csv", index_col="Date", parse_dates=True)
+    return pd.read_csv(
+        f"{STOCKS_DIR}/{TODAY}-{ticker_symbol}.csv", index_col="Date", parse_dates=True
+    )
 
 
 def append_to_csv(ticker_symbol):
@@ -139,10 +154,12 @@ def append_to_csv(ticker_symbol):
     ]
 
     # Check if the file exists to decide whether to write the header
-    file_exists = os.path.isfile("more_stocks.csv")
+    file_exists = os.path.isfile(f"{STOCKS_DIR}/more_stocks.csv")
 
     # Append the information to the CSV file
-    with open("more_stocks.csv", "a", newline="", encoding="utf-8") as file:
+    with open(
+        f"{STOCKS_DIR}/more_stocks.csv", "a", newline="", encoding="utf-8"
+    ) as file:
         writer = csv.DictWriter(file, fieldnames=header)
 
         if not file_exists:
@@ -150,37 +167,35 @@ def append_to_csv(ticker_symbol):
 
         writer.writerow(additional_info)
 
+append_to_csv('RXT')
+
+def list_local_csv_files():
+    """
+    List all local CSV files in the data directory.
+    """
+    return [os.path.basename(x)[:-4] for x in glob.glob("{STOCKS_DIR}/*.csv")]
+
 
 ###############################################################################
 
 # Streamlit UI
 st.title("Stock Data Analyzer")
 
-ALL_TICKER = list(SP_500_LIST["Symbol"]) + list(MORE_STOCK_LIST["Symbol"])
+# ALL_TICKER = list(SP_500_LIST["Symbol"]) + list(MORE_STOCK_LIST["Symbol"])
+ALL_TICKER = list(SP_500_LIST["Symbol"])
 
 for symbol in ALL_TICKER:
     # Check if data exists locally
-    if not os.path.exists(f"{BASE_DIR}/{TODAY}-{symbol}.json"):
+    if not os.path.exists(f"{STOCKS_DIR}/{TODAY}-{symbol}.json"):
         info = fetch_stock_info(symbol)
         save_stock_info_to_json(info, symbol)
         time.sleep(SLEEP_TIME)
 
-    if os.path.exists(f"{BASE_DIR}/{symbol}.csv"):
-        # print(f"Stock data for {symbol} exists locally")
-        pass
-    else:
+    if not os.path.exists(f"{STOCKS_DIR}/{TODAY}-{symbol}.csv"):
         tmp_data = fetch_stock_data(symbol)
         save_stock_data_to_csv(tmp_data, symbol)
         print(f"Cached data for {symbol}")
         time.sleep(SLEEP_TIME)
-
-
-def list_local_csv_files():
-    """
-    List all local CSV files in the data directory.
-    """
-    return [os.path.basename(x)[:-4] for x in glob.glob("{BASE_DIR}/*.csv")]
-
 
 # List local CSV files and display dropdown
 local_files = list_local_csv_files()
@@ -205,7 +220,7 @@ data_dict = {}
 for ticker in all_tickers:
     if ticker:  # Check if the ticker is not an empty string
         # Check if data exists locally
-        if os.path.exists(f"{BASE_DIR}/{ticker}.csv"):
+        if os.path.exists(f"{STOCKS_DIR}/{TODAY}-{ticker}.csv"):
             st.write(f"Stock data for {ticker} exists locally.")
             data = read_stock_data_from_csv(ticker)
         else:

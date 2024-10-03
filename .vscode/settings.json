@@ -1,7 +1,19 @@
 {
     "cSpell.words": [
+        "alphavantage",
+        "AROON",
+        "COMOD",
+        "DEMA",
         "FXAIX",
+        "MACDEXT",
+        "ndxt",
+        "STOCH",
+        "STOCHF",
+        "STOCHRSI",
+        "TEMA",
+        "TRIMA",
         "VFAIX",
+        "WILLR",
         "yfinance"
     ]
 }

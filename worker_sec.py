@@ -14,11 +14,12 @@ from sec_edgar_downloader import Downloader
 
 from shared import OTHER_STOCKS, fetch_stock_data, get_sp500_tickers, refresh_sp500
 
-WORKER_POLL_FREQ = (24) * (60 * 60)
+WORKER_POLL_FREQ = (6) * (60 * 60)  # hrs * mins * secs
 DATA_DIR = os.getenv("DATA_DIR", "/data")
 
 WORKERS = int(os.getenv("WORKERS", "1"))
-WORKER_WAIT = 1  # force a 1s wait before we start
+WORKER_START_WAIT = 1  # force a 1s wait before we start
+WORKER_END_WAIT = 5
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -33,8 +34,8 @@ refresh_sp500()
 SP500_LIST = get_sp500_tickers()
 
 # Trimming the list as we are grabbing too much data right now.
-# FORMS = ["13F-HR", "13F-NT", "10-K", "10-Q", "8-K", "3", "4", "5", "144"]
-FORMS = ["13F-HR", "10-K", "10-Q"]
+FORMS = ["13F-HR", "13F-NT", "10-K", "10-Q", "8-K", "3", "4", "5", "144"]
+# FORMS = ["13F-HR", "10-K", "10-Q"]
 
 
 def get_available_forms():
@@ -58,24 +59,25 @@ for f in get_available_forms():
 #         dl.get(filing_type, ticker, download_details=True, include_amends=True, limit=1)
 #         logger.info("Got data for %s for %s", filing_type, ticker)
 
-#     time.sleep(WORKER_WAIT)
+#     time.sleep(WORKER_START_WAIT)
 
 
 def get_sec_filing(ticker, form, limit=4):
     """Get SEC data."""
     base = f"{DATA_DIR}/sec-edgar-filings/{ticker}/{form}/*"
     files = glob(base)
-    print(files)
+    # print(files)
     if len(files) >= limit:
-        logger.info("Form(s) %s already present for %s", form, ticker)
+        logger.debug("Form(s) %s already present for %s", form, ticker)
         return "OK"
     else:
-        logger.info("Downloading %s for %s", form, ticker)
+        logger.debug("Downloading %s for %s", form, ticker)
 
     try:
-        time.sleep(WORKER_WAIT)
+        time.sleep(WORKER_START_WAIT)
         dl.get(form, ticker, download_details=True, include_amends=True, limit=limit)
-        logger.info("Got data for %s for %s", form, ticker)
+        logger.debug("Got data for %s for %s", form, ticker)
+        time.sleep(WORKER_END_WAIT)
     except Exception as e:
         logger.error("Error downloading %s for %s - %s", form, ticker, e)
 
@@ -116,7 +118,7 @@ if __name__ == "__main__":
     args = parse_args()
     TICKERS = OTHER_STOCKS + SP500_LIST
     batch = generate_list(TICKERS)
-    logger.info(len(batch))
+    logger.debug("Batch count: %s", len(batch))
     batch_count = len(batch)
     if args.shuffle:
         logger.info("Shuffling the batch to randomize things....")
@@ -124,7 +126,7 @@ if __name__ == "__main__":
     if len(batch) > 0:
         with concurrent.futures.ThreadPoolExecutor(max_workers=WORKERS) as executor:
             future_to_url = {
-                executor.submit(get_sec_filing, job[1], job[0], limit=4): job
+                executor.submit(get_sec_filing, job[1], job[0], limit=4 * 2): job
                 for job in batch
             }
             for future in concurrent.futures.as_completed(future_to_url):

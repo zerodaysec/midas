@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile
     volumes:
-      - /Volumes/DATA/data/finance:/data
+      - /Volumes/data/finance:/data
     environment:
       - WORKERS=1
     entrypoint: ["python", "worker_stocks.py"]
@@ -18,14 +18,14 @@ services:
       context: ./api
       dockerfile: Dockerfile
     volumes:
-      - /Volumes/DATA/data/finance:/data
+      - /Volumes/data/finance:/data
     entrypoint: [
         "uvicorn",
         "--host",
         "0.0.0.0",
         "--port",
         "8000",
-        "api.api:app", #{dir}/{file}:app
+        "api.api:app", # {dir} / {file}:app
         "--reload",
       ]
     networks:
@@ -52,7 +52,7 @@ services:
       context: .
       dockerfile: Dockerfile
     volumes:
-      - /Volumes/DATA/data/finance:/data
+      - /Volumes/data/finance:/data
     environment:
       - WORKERS=10
     entrypoint: ["python", "worker_sec.py"]
@@ -65,7 +65,7 @@ services:
       context: .
       dockerfile: Dockerfile
     volumes:
-      - /Users/jon/Data/FINANCE:/data
+      - /Volumes/data/finance:/data
     environment:
       - WORKERS=2
     # ports:

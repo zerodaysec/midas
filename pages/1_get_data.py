@@ -57,42 +57,11 @@ if ALPHA_VANTAGE_API_KEY is None:
     sys.exit(1)
 
 
-@st.cache_data()
-def refresh_sp500():
-    """Refresh the sp500 from Wikipedia"""
-    url = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
-    response = requests.get(url, headers=HTTP_HEADERS, timeout=30)
-    tables = pd.read_html(response.text)
-    tables[0].to_csv(f"{MIDAS_DATA_DIR}/500.csv", index=False)
-
 refresh_sp500()
 
 CSV_DATA = pd.read_csv(f"{MIDAS_DATA_DIR}/500.csv", index_col="Symbol")
 SP500_LIST = [symbol[0] for symbol in CSV_DATA.iterrows()]
 SP500_LIST.sort()
-
-
-
-
-@st.cache_data()
-def refresh_ndxt():
-    """Refresh the ndxt from Wikipedia"""
-    url = "https://en.wikipedia.org/wiki/Nasdaq-100"
-    response = requests.get(url, headers=HTTP_HEADERS, timeout=30)
-    tables = pd.read_html(response.text)
-    tables[4].to_csv(f"{MIDAS_DATA_DIR}/ndxt.csv", index=False)
-
-
-@st.cache_data()
-def refresh_world_market_cap():
-    """Refresh the ndxt from Wikipedia"""
-    url = (
-        "https://en.wikipedia.org/wiki/List_of_countries_by_stock_market_capitalization"
-    )
-    response = requests.get(url, headers=HTTP_HEADERS, timeout=30)
-    tables = pd.read_html(response.text)
-    tables[0].to_csv(f"{MIDAS_DATA_DIR}/world-market-cap-ranking.csv", index=False)
-    tables[1].to_csv(f"{MIDAS_DATA_DIR}/world-market-cap.csv", index=False)
 
 
 @st.cache_data
@@ -264,208 +233,6 @@ def fetch_stock_data(ticker, force=False):
     return data
 
 
-def fetch_alpha_vantage_data(reqparams, apicall):
-    """
-    Fetches financial data for a given stock ticker from the Alpha Vantage API
-    based on the chosen function.
-
-    Parameters:
-        api_key (str): The API key for the Alpha Vantage API.
-        ticker (str): The stock ticker to query.
-        apicall (str): The API function to use for data retrieval.
-
-    Returns:
-        dict: The JSON response from the API as a Python dictionary.
-    """
-    base_url = "https://www.alphavantage.co/query"
-
-    if apicall == "TIME_SERIES_INTRADAY":
-        reqparams["interval"] = "5min"
-
-    response = requests.get(base_url, params=reqparams, timeout=30)
-    response.raise_for_status()
-
-    return response.json()
-
-
-def alpha_save_to_json(jsondata, ticker, apicall):
-    """
-    Saves the API data to a JSON file.
-
-    Parameters:
-        data (dict): The API data to save.
-        ticker (str): The stock ticker to be used in the filename.
-        apicall (str): The API function name to be used in the filename.
-    """
-    filename = f"{MIDAS_DATA_DIR}/alphavantage/{TODAY}-{ticker}-{apicall}.json"
-
-    with open(filename, "w", encoding="utf-8") as f:
-        json.dump(jsondata, f, indent=4)
-
-    print(f"Data saved to {filename}")
-
-
-ALPHA_OPTS = {
-    "available_functions": [
-        "TIME_SERIES_INTRADAY",
-        "TIME_SERIES_DAILY",
-        "TIME_SERIES_WEEKLY",
-        "TIME_SERIES_MONTHLY",
-        "GLOBAL_QUOTE",
-        "INCOME_STATEMENT",
-        "BALANCE_SHEET",
-        "CASH_FLOW",
-        "EARNINGS",
-        "CASH_FLOW",
-    ],
-    "available_global": [
-        "LISTING_STATUS",
-        "EARNINGS_CALENDAR",
-        "IPO_CALENDAR",
-        "CURRENCY_EXCHANGE_RATE",
-        "CURRENCY_EXCHANGE_RATE",
-    ],
-    "commodities": [
-        "WTI",
-        "BRENT",
-        "NATURAL_GAS",
-        "COPPER",
-        "ALUMINUM",
-        "WHEAT",
-        "CORN",
-        "COTTON",
-        "SUGAR",
-        "COFFEE",
-        "ALL_COMMODITIES",
-    ],
-    "economic_indicators": [
-        "REAL_GDP",
-        "REAL_GDP_PER_CAPITA",
-        "TREASURY_YIELD",
-        "FEDERAL_FUNDS_RATE",
-        "CPI",
-        "INFLATION",
-        "RETAIL_SALES",
-        "DURABLES",
-        "UNEMPLOYMENT",
-        "NONFARM_PAYROLL",
-    ],
-    "tech_indicators": [
-        "SMA",
-        "EMA",
-        "WMA",
-        "DEMA",
-        "TEMA",
-        "TRIMA",
-        "KAMA",
-        "MAMA",
-        "T3",
-        "MACDEXT",
-        "STOCH",
-        "STOCHF",
-        "RSI",
-        "STOCHRSI",
-        "WILLR",
-        "ADX",
-        "AROON",
-    ],
-}
-
-
-def get_alpha_vantage_data():
-    data = {}
-    # Loop through all available functions to fetch and save data
-    for function in ALPHA_OPTS["economic_indicators"]:
-        try:
-            ticker = "EconomicIndicator"
-            params = {"function": function, "apikey": ALPHA_VANTAGE_API_KEY}
-            data = fetch_alpha_vantage_data(params, function)
-            alpha_save_to_json(data, ticker, function)
-            time.sleep(
-                RATE_LIMIT_ALPHA_SLEEP
-            )
-            data[function] = data
-        except requests.RequestException as e:
-            logger.error(
-                "An error occurred while fetching data from function %s: %s", function, e
-            )
-
-    # Loop through all available functions to fetch and save data
-    for function in ALPHA_OPTS["commodities"]:
-        try:
-            ticker = "COMOD"
-            params = {"function": function, "apikey": ALPHA_VANTAGE_API_KEY}
-            # Fetch the data from the Alpha Vantage API
-            data = fetch_alpha_vantage_data(params, function)
-            # Save the data to a JSON file
-            alpha_save_to_json(data, ticker, function)
-            # To avoid hitting rate limits, wait before the next API call
-            time.sleep(
-                RATE_LIMIT_ALPHA_SLEEP
-            )  # Adjust this based on your API rate limits
-            data[function] = data
-        except requests.RequestException as e:
-            logger.error(
-                "An error occurred while fetching data from function %s: %s", function, e
-            )
-
-    return data
-
-
-def get_alpha_vantage_ticker_data(ticker):
-
-    data = {}
-
-    # Loop through all available functions to fetch and save data
-    for function in ALPHA_OPTS["available_functions"]:
-        try:
-            params = {
-                "function": function,
-                "symbol": ticker,
-                "apikey": ALPHA_VANTAGE_API_KEY,
-            }
-            # Fetch the data from the Alpha Vantage API
-            data = fetch_alpha_vantage_data(params, function)
-            # Save the data to a JSON file
-            alpha_save_to_json(data, ticker, function)
-            # To avoid hitting rate limits, wait before the next API call
-            time.sleep(
-                RATE_LIMIT_ALPHA_SLEEP
-            )  # Adjust this based on your API rate limits
-            data[function] = data
-        except requests.RequestException as e:
-            logger.error(
-                "An error occurred while fetching data from function %s: %s", function, e
-            )
-
-    # Loop through all available functions to fetch and save data
-    for function in ALPHA_OPTS["tech_indicators"]:
-        try:
-            params = {
-                "function": function,
-                "symbol": ticker,
-                "apikey": ALPHA_VANTAGE_API_KEY,
-                "interval": "daily",
-            }
-            # Fetch the data from the Alpha Vantage API
-            data = fetch_alpha_vantage_data(params, function)
-            # Save the data to a JSON file
-            alpha_save_to_json(data, ticker, function)
-            # To avoid hitting rate limits, wait before the next API call
-            time.sleep(
-                RATE_LIMIT_ALPHA_SLEEP
-            )  # Adjust this based on your API rate limits
-            data[function] = data
-        except requests.RequestException as e:
-            logger.error(
-                "An error occurred while fetching data from function %s: %s",
-                function,
-                e,
-            )
-
-    return data
-
-
 # ------ Main App Function ------
 def main():
     """main."""
@@ -479,8 +246,6 @@ def main():
         #     fetch_stock_data(stk)
 
         st.write("Refreshing SP500.csv")
-        refresh_sp500()
-        refresh_ndxt()
         st.write("Refreshing ndxt.csv")
         # st.write('Refreshing get_alpha_vantage_data()')
         # get_alpha_vantage_data()
@@ -496,9 +261,6 @@ def main():
 
 
 if __name__ == "__main__":
-    refresh_world_market_cap()
-    refresh_ndxt()
-    refresh_sp500()
     main()
     # alpha_data = get_alpha_vantage_data()
     # logger.debug(alpha_data)

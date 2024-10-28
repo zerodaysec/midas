@@ -2041,11 +2041,11 @@
                 "repair"
             ],
             "hashes": [
-                "sha256:37bdbd5ee252bfebd1d88614ea213361f00a3b4bf7cfd62a4efb16900a055abc",
-                "sha256:e9c7afd965776d23f1f561c1617917a696936ad2ca63e3490dfaf2a8606c80de"
+                "sha256:1434cd8bf22f345fa27ef1ed82bfdd291c1bb5b6fe3067118a94e256aa90c4eb",
+                "sha256:eda797145faa4536595eb629f869d3616e58ed7e71de36856b19f1abaef71a5b"
             ],
             "index": "pypi",
-            "version": "==0.2.47"
+            "version": "==0.2.48"
         }
     },
     "develop": {}

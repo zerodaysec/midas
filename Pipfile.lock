@@ -50,11 +50,11 @@
         },
         "attrs": {
             "hashes": [
-                "sha256:5cfb1b9148b5b086569baec03f20d7b6bf3bcacc9a42bebf87ffaaca362f6346",
-                "sha256:81921eb96de3191c8258c199618104dd27ac608d9366f5e35d011eae1867ede2"
+                "sha256:8f5c07333d543103541ba7be0e2ce16eeee8130cb0b3f9238ab904ce1e85baff",
+                "sha256:ac96cd038792094f438ad1f6ff80837353805ac950cd2aa0e0625ef19850c308"
             ],
-            "markers": "python_version >= '3.7'",
-            "version": "==24.2.0"
+            "markers": "python_version >= '3.8'",
+            "version": "==24.3.0"
         },
         "beautifulsoup4": {
             "hashes": [
@@ -90,11 +90,11 @@
         },
         "certifi": {
             "hashes": [
-                "sha256:922820b53db7a7257ffbda3f597266d435245903d80737e34f8a45ff3e3230d8",
-                "sha256:bec941d2aa8195e248a60b31ff9f0558284cf01a52591ceda73ea9afffd69fd9"
+                "sha256:1275f7a45be9464efc1173084eaa30f866fe2e47d389406136d332ed4967ec56",
+                "sha256:b650d30f370c2b724812bee08008be0c4163b163ddaec3f2546c1caf65f191db"
             ],
             "markers": "python_version >= '3.6'",
-            "version": "==2024.8.30"
+            "version": "==2024.12.14"
         },
         "charset-normalizer": {
             "hashes": [
@@ -927,11 +927,11 @@
         },
         "narwhals": {
             "hashes": [
-                "sha256:03772e08a6e70d6a5029b2299fa4d4acc51411cca5119afffd6bbc4c762038f4",
-                "sha256:a2607fa66f0b6ccf6f54df57ee6bc4967b68095d2968c828894a5f77ed9d3c50"
+                "sha256:b1da4e2e4ab185824781760319ac1ec8ee2944a929795064c3a64ffff16b00c4",
+                "sha256:c6bb6b6fba59caeab28a7d6ec1e79ab0040c75baef2e4152199ad1a9c266ef96"
             ],
             "markers": "python_version >= '3.8'",
-            "version": "==1.17.0"
+            "version": "==1.18.4"
         },
         "numpy": {
             "hashes": [
@@ -1692,12 +1692,12 @@
         },
         "streamlit": {
             "hashes": [
-                "sha256:66a0e7ccb6c685b52782966f4a2fe63f757627eeaad0ca3f5b335b5bf191e7bd",
-                "sha256:87c20027fcbc8690ad0955b7e89aea2276d14fca2c8c4b54a251bf2b66b40201"
+                "sha256:0def00822480071d642e6df36cd63c089f991da3a69fd9eb4ab8f65ce27de4e0",
+                "sha256:6626d32b098ba1458b71eebdd634c62af2dd876380e59c4b6a1e828a39d62d69"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.9' and python_full_version != '3.9.7'",
-            "version": "==1.41.0"
+            "version": "==1.41.1"
         },
         "tenacity": {
             "hashes": [

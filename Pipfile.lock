@@ -1619,12 +1619,12 @@
         },
         "sec-edgar-downloader": {
             "hashes": [
-                "sha256:65135b673c8ff1c4f2c400ae6828b8720ba5af3bc7c58729000ef741e3403e56",
-                "sha256:cab5ed1de1fce59722b609567f4c1790b2bf96308f7e6c74671e83b27dde7316"
+                "sha256:a67f298c66c8c63773c6aad69d1b99e6fedca5d8fd3b9c1a6e99218dd73e0d26",
+                "sha256:c7e101c84ac10da1fd113aab2d31d81b850c49a27e2bb37cb86a7ead808b4bfc"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.8'",
-            "version": "==5.0.2"
+            "version": "==5.0.3"
         },
         "six": {
             "hashes": [

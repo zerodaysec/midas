@@ -2024,11 +2024,11 @@
                 "repair"
             ],
             "hashes": [
-                "sha256:2364c787eb9096f768014ca84175b6d9ccd1656bc252eb0698bd991352536b6a",
-                "sha256:529626244ebcfe0185d2cfdab120b5534b493c007f58722c16f4e4da55386b5b"
+                "sha256:8754f90332158d5d19bf754c1b230864ca2d1d313182a3f94a7bc7718bbe7d90",
+                "sha256:a4ab8e2ecba4fda5a36bff0bdc602a014adc732e5eda5d3ac283836ce40356e8"
             ],
             "index": "pypi",
-            "version": "==0.2.53"
+            "version": "==0.2.54"
         }
     },
     "develop": {}

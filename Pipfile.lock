@@ -873,11 +873,11 @@
         },
         "narwhals": {
             "hashes": [
-                "sha256:8bdbf3f76155887412eea04b0b06303856ac1aa3d9e8bda5b5e54612855fa560",
-                "sha256:bd0aa41434737adb4b26f8593f3559abc7d938730ece010fe727b58bc363580d"
+                "sha256:6233d2457debf4b5fe4a1da54530c6fe2d84326f4a8e3bca35bbbff580a347cb",
+                "sha256:f653319112fd121a1f1c18a40cf70dada773cdacfd53e62c2aa0afae43c17129"
             ],
             "markers": "python_version >= '3.8'",
-            "version": "==1.32.0"
+            "version": "==1.33.0"
         },
         "numpy": {
             "hashes": [
@@ -1645,20 +1645,20 @@
         },
         "streamlit": {
             "hashes": [
-                "sha256:98510d03e53622bba8f0e9f2fd4f1191b3b55e5c7e55abbbaa0289cb9e21cdea",
-                "sha256:da75933bae94595167f43822dea43fcdde0d747433f7d04989266d78967951bb"
+                "sha256:9fe355f58b11f4eb71e74f115ce1f38c4c9eaff2733e6bcffb510ac1298a5990",
+                "sha256:c6914ed6d5b76870b461510476806db370f36425ae0e6654d227c988288198d3"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.9' and python_full_version != '3.9.7'",
-            "version": "==1.44.0"
+            "version": "==1.44.1"
         },
         "tenacity": {
             "hashes": [
-                "sha256:807f37ca97d62aa361264d497b0e31e92b8027044942bfa756160d908320d73b",
-                "sha256:93de0c98785b27fcf659856aa9f54bfbd399e29969b0621bc7f762bd441b4539"
+                "sha256:1169d376c297e7de388d18b4481760d478b0e99a777cad3a9c86e556f4b697cb",
+                "sha256:f77bf36710d8b73a50b2dd155c97b870017ad21afe6ab300326b0371b3b05138"
             ],
-            "markers": "python_version >= '3.8'",
-            "version": "==9.0.0"
+            "markers": "python_version >= '3.9'",
+            "version": "==9.1.2"
         },
         "toml": {
             "hashes": [

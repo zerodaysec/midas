@@ -10,7 +10,7 @@ python = "^3.12"
 requests = "^2.32.3"
 pandas = "^2.2.3"
 lxml = "^5.3.2"
-beautifulsoup4 = "^4.13.3"
+beautifulsoup4 = "^4.13.4"
 
 
 [build-system]
